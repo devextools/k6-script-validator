@@ -1,0 +1,28 @@
+# Node dependencies
+node_modules/
+
+# Build artifacts
+dist/
+coverage/
+.nyc_output/
+
+# VCS and metadata
+.git/
+.gitignore
+.DS_Store
+
+# Editor/IDE
+.vscode/
+.idea/
+
+# Logs
+*.log
+logs/
+
+# Docs (not needed for image build)
+docs/
+
+# Temp
+tmp/
+temp/
+.cache/
