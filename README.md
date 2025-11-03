@@ -172,4 +172,4 @@ if (!result.valid) {
 
 MIT License — see `LICENSE` for details.
 
-Created by @annakhvorostianova with love.
+Created with ❤️  by [@testprogmath](https://github.com/testprogmath).
