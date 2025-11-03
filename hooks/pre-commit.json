@@ -1,0 +1,32 @@
+{
+    "steps": [{
+        "name": "Install",
+        "command": "make install",
+        "serial": true
+    },
+    {
+        "name": "Format",
+        "command": "make fmt",
+        "serial": false
+    },
+    {
+        "name": "Lint",
+        "command": "make lint",
+        "serial": false
+    },
+    {
+        "name": "Build",
+        "command": "make build",
+        "serial": false
+    },
+    {
+        "name": "Test",
+        "command": "make test",
+        "serial": false
+    },
+    {
+        "name": "Generate docs",
+        "command": "make docs",
+        "serial": false
+    }]
+}

@@ -1,0 +1,236 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "K6 Script Validator Service",
+    "description": "A security-focused validation service for K6 performance testing scripts",
+    "version": "1.0.0",
+    "contact": {
+      "name": "Project Maintainers"
+    },
+    "license": {
+      "name": "MIT"
+    }
+  },
+  "servers": [
+    {
+      "url": "http://localhost:3000",
+      "description": "Local development server"
+    }
+  ],
+  "tags": [
+    {
+      "name": "Health",
+      "description": "Health check and service information endpoints"
+    },
+    {
+      "name": "Validation",
+      "description": "K6 script validation endpoints"
+    }
+  ],
+  "paths": {
+    "/": {
+      "get": {
+        "summary": "Service information",
+        "description": "Returns basic service information and health status",
+        "tags": [
+          "Health"
+        ],
+        "responses": {
+          "200": {
+            "description": "Service information",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "service": {
+                      "type": "string",
+                      "example": "k6-script-validator"
+                    },
+                    "version": {
+                      "type": "string",
+                      "example": "1.0.0"
+                    },
+                    "status": {
+                      "type": "string",
+                      "example": "running"
+                    },
+                    "timestamp": {
+                      "type": "string",
+                      "format": "date-time"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/validate": {
+      "post": {
+        "summary": "Validate K6 script",
+        "description": "Validates a K6 performance testing script for security vulnerabilities,\nresource usage limits, and K6-specific requirements.\n\n## Security Patterns Detected\n- Dynamic code execution (eval, Function, etc.)\n- XSS and SQL injection patterns\n- Command injection and path traversal\n- Forbidden Node.js modules and browser APIs\n- Base64 obfuscation and high-entropy strings\n",
+        "tags": [
+          "Validation"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/x-www-form-urlencoded": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "script": {
+                    "type": "string",
+                    "description": "The K6 script content to validate",
+                    "example": "import http from 'k6/http';\n\nexport default function() {\n  http.get('https://httpbin.org/get');\n}\n"
+                  }
+                },
+                "required": [
+                  "script"
+                ]
+              }
+            },
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "script": {
+                    "type": "string",
+                    "description": "The K6 script content to validate"
+                  }
+                },
+                "required": [
+                  "script"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Script validation successful",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValidationResponse"
+                },
+                "examples": {
+                  "success": {
+                    "summary": "Valid K6 script",
+                    "value": {
+                      "valid": true,
+                      "message": "Script validation passed",
+                      "errors": []
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Script validation failed",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValidationResponse"
+                },
+                "examples": {
+                  "security_violation": {
+                    "summary": "Security pattern detected",
+                    "value": {
+                      "valid": false,
+                      "message": "Script validation failed",
+                      "errors": [
+                        "Dangerous dynamic code execution detected: eval("
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      }
+    },
+    "/api/v1/health": {
+      "get": {
+        "summary": "Health check",
+        "description": "Returns the health status of the validation service",
+        "tags": [
+          "Health"
+        ],
+        "responses": {
+          "200": {
+            "description": "Service is healthy",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "string",
+                      "example": "healthy"
+                    },
+                    "service": {
+                      "type": "string",
+                      "example": "k6-script-validator"
+                    },
+                    "timestamp": {
+                      "type": "string",
+                      "format": "date-time"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "ValidationResponse": {
+        "type": "object",
+        "properties": {
+          "valid": {
+            "type": "boolean",
+            "description": "Whether the script passed validation",
+            "example": true
+          },
+          "message": {
+            "type": "string",
+            "description": "Human-readable validation result message",
+            "example": "Script validation passed"
+          },
+          "errors": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "List of validation errors that caused the script to fail",
+            "example": []
+          },
+          "warnings": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "List of validation warnings (script still passes)",
+            "example": []
+          }
+        },
+        "required": [
+          "valid",
+          "message",
+          "errors"
+        ]
+      }
+    }
+  }
+}
