@@ -50,9 +50,12 @@ jobs:
           type=semver,pattern={{major}}.{{minor}}
           type=semver,pattern={{major}}
           type=raw,value=latest,enable={{is_default_branch}}
+          type=raw,value=latest,enable={{is_tag}}
           type=raw,value=sha-${{ github.sha }}
+          type=raw,value=release,enable={{is_tag}}
 
     - name: Build and push Docker image
+      id: build
       uses: docker/build-push-action@v5
       with:
         context: .
@@ -64,4 +67,19 @@ jobs:
         cache-to: type=gha,mode=max
         build-args: |
           NODE_ENV=production
-        provenance: false
+        provenance: true
+
+    - name: Generate SBOM (SPDX JSON)
+      if: github.event_name != 'pull_request'
+      uses: anchore/sbom-action@v0
+      with:
+        image: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}@${{ steps.build.outputs.digest }}
+        format: spdx-json
+        output-file: sbom.spdx.json
+
+    - name: Upload SBOM artifact
+      if: github.event_name != 'pull_request'
+      uses: actions/upload-artifact@v4
+      with:
+        name: sbom-${{ github.sha }}
+        path: sbom.spdx.json

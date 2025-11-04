@@ -13,7 +13,7 @@ This is the K6 Script Validator Service, a security-focused validation service f
 - **Language**: TypeScript
 - **Framework**: Express.js
 - **Testing**: Jest with coverage
-- **Linting**: ESLint with TypeScript rules
+- **Linting**: ESLint with TypeScript rules (flat config in `eslint.config.mjs`)
  
 - **Parser**: Acorn for JavaScript AST parsing
 - **Security**: RE2 for safe regex operations
@@ -201,6 +201,23 @@ docker build -t k6-script-validator .
 # Run container
 docker run -p 3000:3000 k6-script-validator
 ```
+
+## Makefile Shortcuts
+
+Common targets to speed up local workflows:
+- `make help` — List targets
+- `make dev` — Start dev server (`tsx watch src/index.ts`)
+- `make lint` / `make lint-fix` — Lint and auto-fix
+- `make build` — Compile TypeScript
+- `make docker-build` / `make docker-up` / `make docker-down` / `make docker-logs` — Build and run the app in Docker
+- `make postman-run-local` — Run Postman collection with local newman
+
+## CI/CD
+
+- `docker-build.yml`: Builds and pushes image to GHCR. Tags include `sha-<commit>` for reproducible pulls.
+- `integration-tests.yml`: Triggers on successful completion of the build workflow. Pulls the `sha-<commit>` image, runs API tests with Postman CLI, uploads JUnit XML, and publishes the HTML report to GitHub Pages.
+- `release.yml`: Runs semantic-release on pushes to `main` to auto-version (SemVer), generate changelog, tag, and create GitHub Releases based on Conventional Commits.
+  - Report URL: the repo GitHub Pages site (e.g., `https://devextools.github.io/k6-script-validator/`).
 
 ## Integration
 

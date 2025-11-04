@@ -1,5 +1,9 @@
 # K6 Script Validator Service
 
+[![Postman Tests](https://github.com/devextools/k6-script-validator/actions/workflows/integration-tests.yml/badge.svg)](https://github.com/devextools/k6-script-validator/actions/workflows/integration-tests.yml)
+[![Docker Build](https://github.com/devextools/k6-script-validator/actions/workflows/docker-build.yml/badge.svg)](https://github.com/devextools/k6-script-validator/actions/workflows/docker-build.yml)
+[![Release](https://github.com/devextools/k6-script-validator/actions/workflows/release.yml/badge.svg)](https://github.com/devextools/k6-script-validator/actions/workflows/release.yml)
+
 A security-focused validation service for K6 performance testing scripts. This service validates user-submitted K6 scripts for security vulnerabilities, resource usage limits, and K6-specific requirements before execution.
 
 ## Features
@@ -83,9 +87,9 @@ Service information endpoint.
 
 ```bash
 # Install dependencies
-npm install
+npm ci
 
-# Start in development mode
+# Start in development mode (tsx watch)
 npm run dev
 
 # Run tests
@@ -111,20 +115,59 @@ docker build -t k6-script-validator .
 docker run -p 3000:3000 k6-script-validator
 ```
 
-### Postman / Newman
+### Container Images and Tags
 
-Run the Postman collection against a running app using Newman via Docker. If your app runs locally on the host, Newman (in Docker) should use `http://host.docker.internal:<port>`.
+- Registry: `ghcr.io/devextools/k6-script-validator`
+- Tags:
+  - `vX.Y.Z`, `X.Y`, `X` — published on Git tags (releases)
+  - `release` — convenience tag pointing to the latest release build
+  - `latest` — builds from the default branch
+  - `sha-<gitsha>` — every build for traceability
+  - `pr-<n>` — per-PR builds (if GHCR permissions allow)
+
+Images include standard OCI labels (title, description, source, revision, version, etc.).
+
+SBOM and Provenance
+- Builds produce an in-toto provenance attestation (BuildKit provenance enabled).
+- An SPDX JSON SBOM is generated with Syft and uploaded as a workflow artifact per build.
+
+### Makefile Shortcuts
 
 ```bash
-# Build, start, wait for health, and run collection in a shared Docker network
-make postman-run-up
+make help                # list targets
+make dev                 # tsx watch dev server
+make build               # compile TypeScript
+make lint / lint-fix     # lint and fix
+make docker-build        # build container image
+make docker-up           # build & run container (detached)
+make docker-down         # stop container
+make docker-logs         # tail app logs
+make postman-run-local   # run collection with local newman
+```
 
-# Or run manually against the host app (if running locally)
-# Use host.docker.internal so the Newman container can reach your host
-make postman-run COLLECTION="postman/K6 Script Validator API - Enhanced Test Suite.postman_collection.json" BASE_URL=http://host.docker.internal:3000
+### Test Reports
 
-# Stop the app
+- Latest Postman report: https://devextools.github.io/k6-script-validator/
+
+### Postman / Newman
+
+Run the Postman collection against a running app using your locally installed Newman.
+
+```bash
+# Start the app (choose one)
+# 1) Dev mode
+npm run dev
+# 2) Or Docker
+make docker-up
+
+# Run the collection locally
+make postman-run-local
+
+# Stop the Docker app if used
 make docker-down
+
+# Run locally using your installed newman
+make postman-run-local
 ```
 
 ### Environment Variables
@@ -189,3 +232,9 @@ if (!result.valid) {
 MIT License — see `LICENSE` for details.
 
 Created with ❤️  by [@testprogmath](https://github.com/testprogmath).
+
+## Releases and Versioning
+
+- Semantic Versioning (SemVer) is automated via semantic-release on pushes to `main`.
+- Use Conventional Commits in PRs; the release workflow analyzes commit messages to determine the next version and changelog.
+- GitHub Releases are created and `CHANGELOG.md` and `package.json` are updated automatically.
