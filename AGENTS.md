@@ -35,6 +35,13 @@
 - PRs must: describe changes, link issues, note config/env impacts, and update docs (`npm run swagger:generate`) when APIs change.
 - CI runs type-check, lint, tests, and build; ensure green before merge. CODEOWNERS auto-request reviews.
 
+## Releases
+- Releases are tag-driven. Create an annotated tag on `main` (e.g., `v1.2.3`) and push it.
+- GitHub Actions on `v*` tags will:
+  - Build and push Docker images tagged `vX.Y.Z`, `X.Y`, `X`, and `latest`.
+  - Create a GitHub Release with generated notes.
+- Branch pushes (including `main`) publish only `sha-<gitsha>` images (no `latest`).
+
 ## Security & Configuration Tips
 - Never execute user-submitted scripts; validators must analyze text only.
 - Update limits in `src/config/default.ts` (e.g., `maxScriptSize`, `maxVUs`) and keep body limits aligned.

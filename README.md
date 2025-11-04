@@ -111,6 +111,27 @@ docker build -t k6-script-validator .
 docker run -p 3000:3000 k6-script-validator
 ```
 
+### Releases and Versioning
+
+- We use SemVer tags to publish releases. Maintainers create an annotated tag on `main` when ready:
+
+```bash
+git checkout main && git pull --ff-only
+git tag -a vX.Y.Z -m "vX.Y.Z"
+git push origin vX.Y.Z
+```
+
+- A GitHub Release is created automatically for each `v*` tag.
+
+### Container Images and Tags
+
+- Registry: `ghcr.io/devextools/k6-script-validator`
+- On tag `vX.Y.Z`, images are pushed with tags:
+  - `vX.Y.Z`, `X.Y`, `X`, and `latest`
+  - `sha-<gitsha>` for traceability
+- On branch pushes (including `main`), images are pushed with:
+  - `sha-<gitsha>` (no `latest` on branch builds)
+
 ### Postman / Newman
 
 Run the Postman collection against a running app using Newman via Docker. If your app runs locally on the host, Newman (in Docker) should use `http://host.docker.internal:<port>`.

@@ -202,6 +202,21 @@ docker build -t k6-script-validator .
 docker run -p 3000:3000 k6-script-validator
 ```
 
+## CI/CD and Releases
+
+- `docker-build.yml`: Builds and pushes images to GHCR. For branch/PR pushes, tags `sha-<commit>` only. For tags (`vX.Y.Z`), tags `vX.Y.Z`, `X.Y`, `X`, and `latest`.
+- `integration-tests.yml`: Runs API tests against the built image and publishes a report to GitHub Pages.
+- `release.yml`: Creates a GitHub Release with generated notes on `v*` tags.
+
+### Tag-driven releases (SemVer)
+After merging to `main` and ensuring CI is green:
+```bash
+git checkout main && git pull --ff-only
+git tag -a vX.Y.Z -m "vX.Y.Z"
+git push origin vX.Y.Z
+```
+This publishes container images with `vX.Y.Z`, `X.Y`, `X`, and `latest` tags.
+
 ## Integration
 
 This service is designed to be called by loadrunner services before executing K6 scripts:
