@@ -63,20 +63,13 @@ jobs:
       run: |
         curl -o- "https://dl-cli.pstmn.io/install/linux64.sh" | sh
         echo "✅ Postman CLI installed successfully"
-
+    - name: Login to Postman CLI
+      run: postman login --with-api-key ${{ secrets.POSTMAN_API_KEY }}
     - name: Run API tests
       env:
         BASE_URL: http://localhost:3000
       run: |
-        postman collection run "postman/collection.json" \
-          --environment "postman/local.postman_environment.json" \
-          --reporters cli,junit,html \
-          --reporter-junit-export test-results.xml \
-          --reporter-html-export test-results.html \
-          --delay-request 500 \
-          --timeout 60000 \
-          --color on
-
+        postman collection run "2362315-c79c91bd-5d15-485c-9754-9c4ab241d6a4" -r cli,junit,html --reporter-junit-export test-results.xml --reporter-html-export test-results.html
     - name: Upload test results
       if: always()
       uses: actions/upload-artifact@v4
