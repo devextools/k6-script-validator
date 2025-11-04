@@ -50,9 +50,9 @@ jobs:
           type=semver,pattern={{major}}.{{minor}}
           type=semver,pattern={{major}}
           type=raw,value=latest,enable={{is_default_branch}}
-          type=raw,value=latest,enable={{is_tag}}
+          type=raw,value=latest,enable={{is_semver}}
           type=raw,value=sha-${{ github.sha }}
-          type=raw,value=release,enable={{is_tag}}
+          type=raw,value=release,enable={{is_semver}}
 
     - name: Build and push Docker image
       id: build
