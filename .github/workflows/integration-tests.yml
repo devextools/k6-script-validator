@@ -5,13 +5,16 @@ on:
     workflows: ["Build and Push Docker Image"]
     types: [completed]
 
+permissions:
+  contents: read
+  packages: read
+  pages: write
+  id-token: write
+
 jobs:
   automated-api-tests:
     if: ${{ github.event.workflow_run.conclusion == 'success' }}
     runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      packages: read
 
     steps:
     - name: Checkout code
@@ -70,11 +73,41 @@ jobs:
         BASE_URL: http://localhost:3000
       run: |
         postman collection run "2362315-c79c91bd-5d15-485c-9754-9c4ab241d6a4" -r cli,junit,html --reporter-junit-export test-results.xml --reporter-html-export test-results.html
-    - name: Upload test results
+    - name: Upload JUnit results (artifact)
       if: always()
       uses: actions/upload-artifact@v4
       with:
-        name: test-results
-        path: |
-          test-results.xml
-          test-results.html
+        name: junit-results
+        path: test-results.xml
+
+    - name: Prepare Pages artifact
+      if: always()
+      run: |
+        mkdir -p report
+        if [ -f test-results.html ]; then
+          cp test-results.html report/index.html
+        else
+          echo "<html><body><h1>No test report available</h1></body></html>" > report/index.html
+        fi
+        if [ -f test-results.xml ]; then cp test-results.xml report/; fi
+
+    - name: Upload GitHub Pages artifact
+      if: always()
+      uses: actions/upload-pages-artifact@v3
+      with:
+        path: report
+
+  deploy-pages:
+    if: always()
+    needs: automated-api-tests
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    permissions:
+      pages: write
+      id-token: write
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
