@@ -1,5 +1,5 @@
 # Makefile
-.PHONY: install lint lint-fix test test-coverage build build-image docker-build docker-run run dev clean clean-coverage docs type-check dev-test help all
+.PHONY: install lint lint-fix test test-coverage build build-image docker-build docker-run docker-up docker-down docker-logs wait-up postman-run postman-run-up postman-run-local run dev clean clean-coverage docs type-check dev-test help all
 
 # Defaults (can be overridden: make docker-build TAG=v1)
 IMAGE ?= k6-script-validator
@@ -7,6 +7,10 @@ TAG ?= latest
 PORT ?= 3000
 HOST ?= 0.0.0.0
 RUN_ARGS ?=
+NETWORK ?= $(IMAGE)-net
+COLLECTION ?= postman/collection.json
+# When running Newman inside Docker against an app on the host, use host.docker.internal
+BASE_URL ?= http://host.docker.internal:$(PORT)
 
 help: ## Show this help
 	@echo "Available targets:" && \
@@ -39,6 +43,17 @@ docker-build: ## Build Docker image with TAG (IMAGE, TAG vars)
 docker-run: ## Run Docker image exposing PORT (IMAGE, TAG, PORT, HOST, RUN_ARGS)
 	docker run --rm -p $(PORT):$(PORT) -e PORT=$(PORT) -e HOST=$(HOST) $(RUN_ARGS) $(IMAGE):$(TAG)
 
+docker-network: ## Create Docker network if missing (NETWORK)
+	@docker network inspect $(NETWORK) > /dev/null 2>&1 || docker network create $(NETWORK)
+
+docker-up: ## Build and run container detached (IMAGE, TAG, PORT, HOST, RUN_ARGS)
+	$(MAKE) docker-build && $(MAKE) docker-network && docker run -d --rm --name $(IMAGE) --network $(NETWORK) -p $(PORT):$(PORT) -e PORT=$(PORT) -e HOST=$(HOST) $(RUN_ARGS) $(IMAGE):$(TAG)
+
+docker-down: ## Stop running container (by name IMAGE)
+	-docker stop $(IMAGE)
+
+docker-logs: ## Tail logs of running container (by name IMAGE)
+	@docker logs -f $(IMAGE)
 run: build ## Build and start app
 	npm start
 

@@ -14,7 +14,9 @@
     "lint": "eslint src/**/*.ts",
     "lint:fix": "eslint src/**/*.ts --fix",
     "type-check": "tsc --noEmit",
-    "swagger:generate": "ts-node src/utils/swagger-generator.ts"
+    "swagger:generate": "ts-node src/utils/swagger-generator.ts",
+    "test:integration": "echo 'Use GitHub Actions or run: postman collection run postman/collection.json -e postman/local.postman_environment.json --reporters cli,html'",
+    "test:postman": "echo 'Use GitHub Actions or run: postman collection run postman/collection.json -e postman/local.postman_environment.json --reporters cli,html'"
   },
   "dependencies": {
     "@types/node": "^24.9.1",

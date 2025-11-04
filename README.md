@@ -111,6 +111,22 @@ docker build -t k6-script-validator .
 docker run -p 3000:3000 k6-script-validator
 ```
 
+### Postman / Newman
+
+Run the Postman collection against a running app using Newman via Docker. If your app runs locally on the host, Newman (in Docker) should use `http://host.docker.internal:<port>`.
+
+```bash
+# Build, start, wait for health, and run collection in a shared Docker network
+make postman-run-up
+
+# Or run manually against the host app (if running locally)
+# Use host.docker.internal so the Newman container can reach your host
+make postman-run COLLECTION="postman/K6 Script Validator API - Enhanced Test Suite.postman_collection.json" BASE_URL=http://host.docker.internal:3000
+
+# Stop the app
+make docker-down
+```
+
 ### Environment Variables
 
 - `PORT`: Server port (default: 3000)
